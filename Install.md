@@ -22,5 +22,3 @@ BiocManager::install("dada2", version = "3.23")
     ##   packages:
     ##     class, cluster, KernSmooth, lattice, MASS, Matrix, nlme, nnet, spatial,
     ##     survival
-
-    ## Old packages: 'diffobj'
