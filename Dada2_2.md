@@ -230,3 +230,54 @@ head(mergers[[1]])
     ## 4       430       4       3    148         0      0      2   TRUE
     ## 5       345       5       6    148         0      0      1   TRUE
     ## 6       282       6       5    148         0      0      2   TRUE
+
+``` r
+seqtab <- makeSequenceTable(mergers)
+dim(seqtab)
+```
+
+    ## [1]  20 293
+
+``` r
+# Inspect distribution of sequence lengths
+table(nchar(getSequences(seqtab)))
+```
+
+    ## 
+    ## 251 252 253 254 255 
+    ##   1  88 196   6   2
+
+``` r
+seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+```
+
+    ## Identified 61 bimeras out of 293 input sequences.
+
+``` r
+dim(seqtab.nochim)
+```
+
+    ## [1]  20 232
+
+``` r
+sum(seqtab.nochim)/sum(seqtab)
+```
+
+    ## [1] 0.9640374
+
+``` r
+getN <- function(x) sum(getUniques(x))
+track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
+# If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+rownames(track) <- sample.names
+head(track)
+```
+
+    ##        input filtered denoisedF denoisedR merged nonchim
+    ## F3D0    7793     7113      6976      6979   6540    6528
+    ## F3D1    5869     5299      5227      5239   5028    5017
+    ## F3D141  5958     5463      5331      5357   4986    4863
+    ## F3D142  3183     2914      2799      2830   2595    2521
+    ## F3D143  3178     2941      2822      2868   2553    2519
+    ## F3D144  4827     4312      4151      4228   3646    3507
