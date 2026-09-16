@@ -83,3 +83,28 @@ head(out)
     ## F3D142_S208_L001_R1_001.fastq     3183      2914
     ## F3D143_S209_L001_R1_001.fastq     3178      2941
     ## F3D144_S210_L001_R1_001.fastq     4827      4312
+
+``` r
+errF <- learnErrors(filtFs, multithread=TRUE)
+```
+
+    ## 33514080 total bases in 139642 reads from 20 samples will be used for learning the error rates.
+
+``` r
+errR <- learnErrors(filtRs, multithread=TRUE)
+```
+
+    ## 22342720 total bases in 139642 reads from 20 samples will be used for learning the error rates.
+
+``` r
+plotErrors(errF, nominalQ=TRUE)
+```
+
+    ## Warning in scale_y_log10(): log-10 transformation introduced infinite values.
+
+    ## Warning: Removed 164 rows containing missing values or values outside the scale range
+    ## (`geom_line()`).
+    ## Removed 164 rows containing missing values or values outside the scale range
+    ## (`geom_line()`).
+
+![](Dada2_2_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
