@@ -99,3 +99,25 @@ rownames(track) <- sample.names
 head(track)
 ```
 
+```{bash}
+wget https://zenodo.org/records/14169026/files/silva_nr99_v138.2_toGenus_trainset.fa.gz
+```
+
+```{bash}
+wget https://zenodo.org/records/14169026/files/silva_v138.2_assignSpecies.fa.gz
+```
+```{r}
+taxa <- assignTaxonomy(seqtab.nochim, "~/Dada2/silva_nr99_v138.2_toGenus_trainset.fa.gz", multithread=TRUE)
+```
+
+
+```{r}
+taxa <- addSpecies(taxa, "~/Dada2/silva_v138.2_assignSpecies.fa.gz")
+```
+
+```{r}
+taxa.print <- taxa # Removing sequence rownames for display only
+rownames(taxa.print) <- NULL
+head(taxa.print)
+```
+
