@@ -36,26 +36,21 @@ list.files(path)
     ## [43] "mouse.time.design"             "stability.batch"              
     ## [45] "stability.files"
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you
-execute code within the notebook, the results appear beneath the code.
-
-Try executing this chunk by clicking the *Run* button within the chunk
-or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
-
 ``` r
-plot(cars)
+# Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
+fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
+fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
+# Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
 ```
 
-![](Dada2_2_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+``` r
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
+```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or
-by pressing *Ctrl+Alt+I*.
+``` r
+plotQualityProfile(fnFs[1:2])
+```
 
-When you save the notebook, an HTML file containing the code and output
-will be saved alongside it (click the *Preview* button or press
-*Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the
-editor. Consequently, unlike *Knit*, *Preview* does not run any R code
-chunks. Instead, the output of the chunk when it was last run in the
-editor is displayed.
+![](Dada2_2_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> 250pb ligne
+verte = moyenne des scores de qualité pour les 7793 seq pour chaque
+position
