@@ -9,7 +9,7 @@ library(dada2)
 
 
 ```{r}
-path <- "/home/rstudio/Dada2/MiSeq_SOP" # CHANGE ME to the directory containing the fastq files after unzipping.
+path <- "" # CHANGE ME to the directory containing the fastq files after unzipping.
 list.files(path)
 ```
 
@@ -18,10 +18,6 @@ list.files(path)
 fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
 fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
 # Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
-```
-
-
-```{r}
 sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
 ```
 ```{r}
@@ -183,5 +179,9 @@ ps.top20 <- prune_taxa(top20, ps.top20)
 plot_bar(ps.top20, x="Day", fill="Family") + facet_wrap(~When, scales="free_x")
 ```
 
-
-
+```{r}
+# Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
+fnFs <- sort(list.files(path="Data", pattern="_1.fastq", full.names = TRUE))
+fnRs <- sort(list.files(path="Data", pattern="_2.fastq", full.names = TRUE))
+# Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
+```
