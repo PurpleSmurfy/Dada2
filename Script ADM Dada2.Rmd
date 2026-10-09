@@ -1,0 +1,111 @@
+---
+title: "R Notebook"
+output: github_document
+---
+
+On charge Dada2 :
+```{r}
+library(dada2); packageVersion("dada2")
+```
+
+Puis on télécharge le fichier .sh
+Dans le terminal on écrit : ls ena-file-download-read_run-PRJNA1107792-fastq_ftp-20261007-0646.sh
+Puis on écrit source ena-file-download-read_run-PRJNA1107792-fastq_ftp-20261007-0646.sh
+
+On vérifie qu'on a le bon nombre de données, dans le terminal :
+ls | wc -l
+
+Depuis le site sra, on télécharge les métadonnées, qu'on importe dans l'environnement.
+
+On sélectionne le chemin où se trouve nos données :
+```{r}
+path <- "~/Dada2/Data"
+```
+
+On vérifie notre liste de fichiers
+```{r}
+list.files(path)
+```
+
+Identifier les fichiers Forward et Reverse :
+```{r}
+fnFs <- sort(list.files(path, pattern="_1.fastq", full.names = TRUE)) #Forward
+fnRs <- sort(list.files(path, pattern="_2.fastq", full.names = TRUE)) #Reverse
+
+# Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
+```
+
+On vérifie les qualité des reads Forward:
+```{r}
+plotQualityProfile(fnFs[1:2])
+```
+
+On vérifie les qualité des reads Reverse:
+```{r}
+plotQualityProfile(fnRs[1:2])
+```
+
+Ensuite on crée des filtres pour nos Forward et Reverse :
+```{r}
+filtFs <- file.path(path, "filtered", paste0(sample.names, "_F_filt.fastq.gz"))
+filtRs <- file.path(path, "filtered", paste0(sample.names, "_R_filt.fastq.gz"))
+names(filtFs) <- sample.names
+names(filtRs) <- sample.names
+```
+
+Troncage des reads :
+/!\ Habituellement 240pb pour les forwards et 160pb pour les reverse. Ici le troncage a été fait à 260pb pour les forward et 220pb pour les reverse.
+```{r}
+out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(260,220),
+              maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
+              compress=TRUE, multithread=FALSE) 
+head(out)
+```
+
+```{r}
+errF <- learnErrors(filtFs, multithread=TRUE)
+```
+```{r}
+errR <- learnErrors(filtRs, multithread=TRUE)
+```
+```{r}
+plotErrors(errF, nominalQ=TRUE)
+```
+```{r}
+dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
+```
+```{r}
+dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
+```
+```{r}
+dadaFs[[1]]
+```
+```{r}
+mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
+# Inspect the merger data.frame from the first sample
+head(mergers[[1]])
+```
+```{r}
+seqtab <- makeSequenceTable(mergers)
+dim(seqtab)
+```
+```{r}
+# Inspect distribution of sequence lengths
+table(nchar(getSequences(seqtab)))
+```
+```{r}
+seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+dim(seqtab.nochim)
+```
+```{r}
+sum(seqtab.nochim)/sum(seqtab)
+```
+```{r}
+getN <- function(x) sum(getUniques(x))
+track <- cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, getN), rowSums(seqtab.nochim))
+# If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+rownames(track) <- sample.names
+head(track)
+```
